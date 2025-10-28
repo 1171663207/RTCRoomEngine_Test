@@ -96,6 +96,9 @@ typedef NS_ENUM(NSInteger, TUIError) {
     /// 开启屏幕分享失败，检查房间内是否有人正在屏幕分享。
     TUIErrorStartScreenSharingFailed = -1109,
 
+    /// 音频采集设备不可用（例如被系统电话或微信语音电话占用）。
+    TUIErrorAudioCaptureDeviceUnavailable = -1110,
+
     /// 需要进房后才可使用此功能。
     TUIErrorOperationInvalidBeforeEnterRoom = -2101,
 

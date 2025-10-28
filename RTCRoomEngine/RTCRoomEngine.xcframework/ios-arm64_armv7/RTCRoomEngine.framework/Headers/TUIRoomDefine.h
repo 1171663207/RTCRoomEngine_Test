@@ -86,16 +86,68 @@ typedef NS_ENUM(NSUInteger, TUIRoomDismissedReason) {
 /**
  * 1.6 用户的挂起状态
  */
-typedef NS_ENUM(NSUInteger, TUISuspendState) {
+typedef NS_ENUM(NSUInteger, TUISuspendStatus) {
 
     /// 未挂起
-    TUISuspendStateNone = 0,
+    TUISuspendStatusNone = 0,
 
     /// 用户进入后台挂起
-    TUISuspendStateInBackground = 1 << 0,
+    TUISuspendStatusInBackground = 1 << 0,
 
     /// 用户正在接听电话
-    TUISuspendStateInCalling = 1 << 1,
+    TUISuspendStatusInCalling = 1 << 1,
+
+};
+
+/**
+ * 1.7 用户的设备状态
+ */
+typedef NS_ENUM(NSUInteger, TUIDeviceStatus) {
+
+    /// 当前设备处于打开状态
+    TUIDeviceStatusOpened = 0,
+
+    /// 当前设备处于关闭状态，且是用户主动关闭
+    TUIDeviceStatusClosedBySelf = 1,
+
+    /// 当前设备处于关闭状态，且是被房主/管理员强制关闭
+    TUIDeviceStatusClosedByAdmin = 2,
+
+};
+
+/**
+ * 1.8 移动麦上用户的策略
+ */
+typedef NS_ENUM(NSUInteger, TUIMoveSeatPolicy) {
+
+    /// 目标麦位有人时放弃移动（默认策略）​​
+    TUIMoveSeatPolicyAbortWhenOccupied = 0,
+
+    /// 强制替换目标麦位上的用户​​，被替换的用户将会被踢下麦
+    TUIMoveSeatPolicyForceReplace = 1,
+
+    /// ​与目标麦位用户交换位置​​
+    TUIMoveSeatPolicySwapPosition = 2,
+
+};
+
+/**
+ * 1.9 锁定麦位标记位
+ */
+typedef NS_OPTIONS(NSUInteger, TUISeatLockFlag) {
+
+    TUISeatLockFlagNone = 0x00,
+
+    /// 锁定麦位
+    TUISeatLockFlagSeat = 0x01 << 0,
+
+    /// 锁定麦位摄像头
+    TUISeatLockFlagVideo = 0x01 << 1,
+
+    /// 锁定麦位麦克风
+    TUISeatLockFlagAudio = 0x01 << 2,
+
+    TUISeatLockFlagAll = TUISeatLockFlagSeat | TUISeatLockFlagVideo | TUISeatLockFlagAudio,
 
 };
 
@@ -343,6 +395,9 @@ TUIENGINE_EXPORT @interface TUILoginUserInfo : NSObject
 /// 用户头像URL。
 @property(nonatomic, copy, nonnull) NSString* avatarUrl;
 
+/// 用户的等级。
+@property(nonatomic, assign) NSUInteger level;
+
 /// 自定义信息。
 @property(nonatomic, strong, nullable) NSDictionary<NSString*, NSData*>* customInfo __attribute__((deprecated("use customInfo in TUIUserInfo instead")));
 
@@ -379,6 +434,9 @@ TUIENGINE_EXPORT @interface TUIUserInfo : NSObject
 
 /// 是否被禁止发送消息，默认值：{@link NO}。
 @property(nonatomic, assign) BOOL isMessageDisabled;
+
+/// 用户等级。
+@property(nonatomic, assign) NSUInteger level;
 
 /// 房间成员自定义信息。
 @property(nonatomic, strong, nullable) NSDictionary<NSString*, NSData*>* roomCustomInfo;
@@ -423,6 +481,9 @@ TUIENGINE_EXPORT @interface TUIRoomVideoEncoderParams : NSObject
  * 5.6 房间内座位信息
  */
 TUIENGINE_EXPORT @interface TUISeatInfo : NSObject
+
+/// 房间 ID。
+@property(nonatomic, copy, nullable) NSString* roomId;
 
 /// 麦位序号。
 @property(nonatomic, assign) NSInteger index;
@@ -474,13 +535,13 @@ TUIENGINE_EXPORT @interface TUISeatFullInfo : NSObject
 @property(nonatomic, copy, nullable) NSString* userAvatar;
 
 /// 麦上用户的麦克风状态
-@property(nonatomic, assign) BOOL isUserMicrophoneOpened;
+@property(nonatomic, assign) TUIDeviceStatus userMicrophoneStatus;
 
 /// 麦上用户的摄像头状态
-@property(nonatomic, assign) BOOL isUserCameraOpened;
+@property(nonatomic, assign) TUIDeviceStatus userCameraStatus;
 
 /// 麦上用户的挂起状态
-@property(nonatomic, assign) TUISuspendState userSuspendState;
+@property(nonatomic, assign) TUISuspendStatus userSuspendStatus;
 
 /// 麦位的 x 坐标
 @property(nonatomic, assign) NSUInteger x;
@@ -512,6 +573,9 @@ TUIENGINE_EXPORT @interface TUISeatLockParams : NSObject
 
 /// 锁定麦位麦克风，默认值：{@link NO}。
 @property(nonatomic, assign) BOOL lockAudio;
+
+/// 锁定麦位标记位，默认值：{@link TUISeatLockFlagAll}。
+@property(nonatomic, assign) TUISeatLockFlag lockFlag;
 
 @end
 
@@ -690,6 +754,13 @@ typedef void (^TUIRequestRejectedBlock)(NSString* _Nonnull requestId, NSString* 
 typedef void (^TUIRequestCancelledBlock)(NSString* _Nonnull requestId, NSString* _Nonnull userId);
 typedef void (^TUIRequestTimeoutBlock)(NSString* _Nonnull requestId, NSString* _Nonnull userId);
 typedef void (^TUIRequestErrorBlock)(NSString* _Nonnull requestId, NSString* _Nonnull userId, TUIError code, NSString* _Nonnull message);
+
+typedef void (^TUIRequestAcceptedCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
+typedef void (^TUIRequestRejectedCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo, NSString* _Nonnull message);
+typedef void (^TUIRequestCancelledCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
+typedef void (^TUIRequestTimeoutCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
+typedef void (^TUIRequestSuccessCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
+typedef void (^TUIRequestErrorCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo, TUIError code, NSString* _Nonnull message);
 
 typedef void (^TUIExperimentalAPIResponseBlock)(NSString* _Nonnull jsonData);
 

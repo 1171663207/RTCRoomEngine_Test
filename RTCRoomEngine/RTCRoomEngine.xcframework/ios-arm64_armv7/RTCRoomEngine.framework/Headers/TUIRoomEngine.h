@@ -807,7 +807,6 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  * - 打开本地摄像头并开始采集视频画面。
  * - 支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  * - 调用此接口后，本地摄像头的视频画面将开始采集，并通过之前设置的渲染视图显示。
- * 调用示例:
  * <pre>
  * // Objective-C 调用示例
  * [[TUIRoomEngine sharedInstance] openLocalCamera:YES quality:TUIVideoQuality1080P onSuccess:^{
@@ -839,31 +838,86 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
 /**
  * 3.3 关闭本地摄像头
  *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
- * 在房间内关闭本地摄像头后，SDK会通过 {@link TUIRoomObserver} 中的 {@link onUserVideoStateChanged} 回调通知房间内用户。
+ * 功能描述:
+ * - 关闭本地摄像头，停止视频采集和画面推送。
+ * - 适用于会议和直播两种房间类型（{@link TUIRoomTypeConference} & {@link TUIRoomTypeLive}）。
+ * - 关闭后本地视频画面将不可见，远端用户也无法收到您的视频流。
+ * - 调用后 SDK 会通过 {@link TUIRoomObserver} 的 {@link onUserVideoStateChanged} 回调通知房间内所有用户您的摄像头状态变化。
+ * <pre>
+ * // Objective-C 调用示例
+ * [[TUIRoomEngine sharedInstance] closeLocalCamera];
+ * // Swift 调用示例
+ * TUIRoomEngine.sharedInstance().closeLocalCamera()
+ * </pre>
+ *
+ * @note
+ * - 若已设置本地视频渲染视图，关闭摄像头后该视图将不再显示视频画面。
+ * - 关闭摄像头不会影响音频采集和推送。
+ * - 可在房间内任意时刻调用，支持多次调用。
  */
 - (void)closeLocalCamera NS_SWIFT_NAME(closeLocalCamera());
 
 /**
  * 3.4 开始推送本地视频。默认开启
  *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
- * 推送本地视频后，若您的本地摄像头已打开，SDK会通过 {@link TUIRoomObserver} 中的 {@link onUserVideoStateChanged} 回调通知房间内用户。
+ * 功能描述:
+ * - 启动本地视频流推送，将摄像头采集到的视频画面发送到房间内其他用户。
+ * - 支持会议和直播两种房间类型（{@link TUIRoomTypeConference} & {@link TUIRoomTypeLive}）。
+ * - 若本地摄像头已打开，调用此接口后会立即开始推送视频流。
+ * - 推送状态变化后，SDK 会通过 {@link TUIRoomObserver} 的 {@link onUserVideoStateChanged} 回调通知房间内用户。
+ * <pre>
+ * // Objective-C 调用示例
+ * [[TUIRoomEngine sharedInstance] startPushLocalVideo];
+ * // Swift 调用示例
+ * TUIRoomEngine.sharedInstance().startPushLocalVideo()
+ * </pre>
+ *
+ * @note
+ * - 若已调用 `stopPushLocalVideo`，则需再次调用本接口恢复视频推送。
+ * - 推送本地视频不会影响本地预览画面。
  */
 - (void)startPushLocalVideo NS_SWIFT_NAME(startPushLocalVideo());
 
 /**
  * 3.5 停止推送本地视频
  *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
- * 停止推送本地视频后，SDK会通过 {@link TUIRoomObserver} 中的 {@link onUserVideoStateChanged} 回调通知房间内用户。
+ * 功能描述:
+ * - 停止将本地摄像头采集的视频画面推送到房间内其他用户。
+ * - 支持会议房间类型和直播房间类型（{@link TUIRoomTypeConference} & {@link TUIRoomTypeLive}）。
+ * - 停止推送后，远端用户将无法接收到您的视频流，但本地预览画面不受影响。
+ * - 状态变化后，SDK 会通过 {@link TUIRoomObserver} 的 {@link onUserVideoStateChanged} 回调通知房间内用户。
+ * <pre>
+ * // Objective-C 调用示例
+ * [[TUIRoomEngine sharedInstance] stopPushLocalVideo];
+ * // Swift 调用示例
+ * TUIRoomEngine.sharedInstance().stopPushLocalVideo()
+ * </pre>
+ *
+ * @note
+ * - 若需恢复视频推送，可再次调用 `startPushLocalVideo` 接口。
+ * - 停止推送本地视频不会关闭摄像头，也不会影响本地视频预览。
  */
 - (void)stopPushLocalVideo NS_SWIFT_NAME(stopPushLocalVideo());
 
 /**
  * 3.6 更新本地视频编码质量设置
  *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
+ * 功能描述:
+ * - 调整本地摄像头采集画面的编码质量，包括分辨率、码率、帧率等参数。
+ * - 可用于根据网络状况或业务需求灵活切换视频清晰度。
+ * - 支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
+ * <pre>
+ * // Objective-C 调用示例
+ * [[TUIRoomEngine sharedInstance] updateVideoQuality:TUIVideoQuality720P];
+ * // Swift 调用示例
+ * TUIRoomEngine.sharedInstance().updateVideoQuality(.quality720P)
+ * </pre>
+ *
+ * 参数说明:
+ * @param quality 视频质量参数请参考 {@link TUIVideoQuality} 枚举定义。
+ * @note
+ * - 建议在打开摄像头后调用此接口，实时生效。
+ * - 调整视频质量不会影响本地预览画面，仅影响推送到房间内其他用户的视频流质量。
  */
 - (void)updateVideoQuality:(TUIVideoQuality)quality NS_SWIFT_NAME(updateVideoQuality(_:));
 
@@ -1113,6 +1167,13 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  */
 - (void)searchUsers:(TUIUserSearchParam *)param onSuccess:(TUIUserSearchResponseBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(searchUsers(param:onSuccess:onError:));
 
+/**
+ * 6.4  获取被禁言的用户列表
+ *
+ * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
+ */
+- (void)getBannedUserList:(TUIUserListResponseBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(getBannedUserList(onSuccess:onError:));
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 //                   房间内用户管理
@@ -1302,22 +1363,24 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  * 上麦成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onSeatListChanged} 通知房间内用户。
  * @note 开启上麦发言模式时，需要向主持人或管理员发起申请才允许上麦。
  *       开启自由发言模式，直播场景可以自由上麦，上麦后开麦发言，会议场景无需调用该接口，即可开麦发言。
- * @param seatIndex 麦位编号。未开启麦位，不关心麦位序列的情况下，填-1即可。
+ * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
  * @param timeout 超时时间，单位秒，如果设置为 0，SDK 不会做超时检测，也不会触发超时回调。
  * @param onAccepted 邀请被接受的回调。
  * @param onRejected 邀请被拒绝的回调。
  * @param onCancelled 邀请被取消的回调。
  * @param onTimeout 邀请超时未处理的回调。
+ * @param onSuccess 邀请发送成功的回调。
  * @param onError 邀请发生错误的回调。
  * @return TUIRequest 请求体。
  */
 - (TUIRequest *)takeSeat:(NSInteger)seatIndex
                  timeout:(NSTimeInterval)timeout
-              onAccepted:(TUIRequestAcceptedBlock)onAccepted
-              onRejected:(TUIRequestRejectedBlock)onRejected
-             onCancelled:(TUIRequestCancelledBlock)onCancelled
-               onTimeout:(TUIRequestTimeoutBlock)onTimeout
-                 onError:(TUIRequestErrorBlock)onError NS_SWIFT_NAME(takeSeat(_:timeout:onAccepted:onRejected:onCancelled:onTimeout:onError:));
+              onAccepted:(TUIRequestAcceptedCallback)onAccepted
+              onRejected:(TUIRequestRejectedCallback)onRejected
+             onCancelled:(TUIRequestCancelledCallback)onCancelled
+               onTimeout:(TUIRequestTimeoutCallback)onTimeout
+               onSuccess:(TUIRequestSuccessCallback)onSuccess
+                 onError:(TUIRequestErrorCallback)onError NS_SWIFT_NAME(takeSeat(seatIndex:timeout:onAccepted:onRejected:onCancelled:onTimeout:onSuccess:onError:));
 
 /**
  * 9.4  下麦
@@ -1340,41 +1403,67 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  *
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  * 接口调用成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onRequestReceived} 通知被邀请用户。
- * @param seatIndex 麦位编号。未开启麦位、无需麦位场景下无需关心，填-1即可。
+ * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
  * @param userId 用户ID。
  * @param timeout 超时时间，单位秒，如果设置为 0，SDK 不会做超时检测，也不会触发超时回调。
  * @param onAccepted 邀请被接受的回调。
  * @param onRejected 邀请被拒绝的回调。
  * @param onCancelled 邀请被取消的回调。
  * @param onTimeout 邀请超时未处理的回调。
+ * @param onSuccess 邀请发送成功的回调。
  * @param onError 邀请发生错误的回调。
  * @return TUIRequest 请求体。
  */
 - (TUIRequest *)takeUserOnSeatByAdmin:(NSInteger)seatIndex
                                userId:(NSString *)userId
                               timeout:(NSTimeInterval)timeout
-                           onAccepted:(TUIRequestAcceptedBlock)onAccepted
-                           onRejected:(TUIRequestRejectedBlock)onRejected
-                          onCancelled:(TUIRequestCancelledBlock)onCancelled
-                            onTimeout:(TUIRequestTimeoutBlock)onTimeout
-                              onError:(TUIRequestErrorBlock)onError NS_SWIFT_NAME(takeUserOnSeatByAdmin(_:userId:timeout:onAccepted:onRejected:onCancelled:onTimeout:onError:));
+                           onAccepted:(TUIRequestAcceptedCallback)onAccepted
+                           onRejected:(TUIRequestRejectedCallback)onRejected
+                          onCancelled:(TUIRequestCancelledCallback)onCancelled
+                            onTimeout:(TUIRequestTimeoutCallback)onTimeout
+                            onSuccess:(TUIRequestSuccessCallback)onSuccess
+                              onError:(TUIRequestErrorCallback)onError NS_SWIFT_NAME(takeUserOnSeatByAdmin(seatIndex:userId:timeout:onAccepted:onRejected:onCancelled:onTimeout:onSuccess:onError:));
 
 /**
  * 9.7  主持人/管理员 将用户踢下麦
  *
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  * 接口调用成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onSeatListChanged} 通知房间内用户。
- * @param seatIndex 麦位编号。未开启麦位，不关心麦位序列的情况下，填-1即可。
+ * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
  * @param userId 用户ID。
  */
 - (void)kickUserOffSeatByAdmin:(NSInteger)seatIndex userId:(NSString *)userId onSuccess:(TUISuccessBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(kickUserOffSeatByAdmin(_:userId:onSuccess:onError:));
 
 /**
- * 9.8  主持人/管理员 获取房间内申请上麦用户的请求列表
+ * 9.8 移动麦上的用户（仅支持房主或者管理员使用此接口）
+ *
+ * @note 当目标麦位有人时，支持三种移麦策略：
+ * - 中断操作（默认）
+ * - 强制替换 - 将原麦位用户踢下麦
+ * - 交换位置 - 互换两个用户的麦位
+ * @param userId 待移动的麦上用户
+ * @param targetSeatIndex 目标麦位的 index
+ * @param policy 移动麦上用户时的策略
+ */
+- (void)moveUserToSeatByAdmin:(NSString *)userId
+              targetSeatIndex:(NSInteger)targetSeatIndex
+                       policy:(TUIMoveSeatPolicy)policy
+                    onSuccess:(TUISuccessBlock)onSuccess
+                      onError:(TUIErrorBlock)onError NS_SWIFT_NAME(moveUserToSeatByAdmin(userId:targetSeatIndex:policy:onSuccess:onError:));
+
+/**
+ * 9.9  主持人/管理员 获取房间内申请上麦用户的请求列表
  *
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  */
 - (void)getSeatApplicationList:(TUIRequestListResponseBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(getSeatApplicationList(onSuccess:onError:));
+
+/**
+ * 9.10 查询麦位列表
+ *
+ * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
+ */
+- (NSArray<TUISeatFullInfo *> *)querySeatList NS_SWIFT_NAME(querySeatList());
 
 /////////////////////////////////////////////////////////////////////////////////
 //

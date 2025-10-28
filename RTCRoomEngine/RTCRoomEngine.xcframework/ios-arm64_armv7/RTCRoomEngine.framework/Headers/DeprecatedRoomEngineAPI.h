@@ -95,5 +95,55 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (id)callExperimentalAPI:(NSString *)jsonStr NS_SWIFT_NAME(callExperimentalAPI(jsonStr:)) __attribute__((deprecated("Deprecated from v3.0")));
 
+/**
+ * 上麦（上麦发言模式下，需要申请）
+ *
+ * @deprecated v3.5 版本开始不推荐使用
+ * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
+ * 上麦成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onSeatListChanged} 通知房间内用户。
+ * @note 开启上麦发言模式时，需要向主持人或管理员发起申请才允许上麦。
+ *       开启自由发言模式，直播场景可以自由上麦，上麦后开麦发言，会议场景无需调用该接口，即可开麦发言。
+ * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
+ * @param timeout 超时时间，单位秒，如果设置为 0，SDK 不会做超时检测，也不会触发超时回调。
+ * @param onAccepted 邀请被接受的回调。
+ * @param onRejected 邀请被拒绝的回调。
+ * @param onCancelled 邀请被取消的回调。
+ * @param onTimeout 邀请超时未处理的回调。
+ * @param onError 邀请发生错误的回调。
+ * @return TUIRequest 请求体。
+ */
+- (TUIRequest *)takeSeat:(NSInteger)seatIndex
+                 timeout:(NSTimeInterval)timeout
+              onAccepted:(TUIRequestAcceptedBlock)onAccepted
+              onRejected:(TUIRequestRejectedBlock)onRejected
+             onCancelled:(TUIRequestCancelledBlock)onCancelled
+               onTimeout:(TUIRequestTimeoutBlock)onTimeout
+                 onError:(TUIRequestErrorBlock)onError NS_SWIFT_NAME(takeSeat(_:timeout:onAccepted:onRejected:onCancelled:onTimeout:onError:));
+
+/**
+ * 主持人/管理员 邀请用户上麦
+ *
+ * @deprecated v3.5 版本开始不推荐使用
+ * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
+ * 接口调用成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onRequestReceived} 通知被邀请用户。
+ * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
+ * @param userId 用户ID。
+ * @param timeout 超时时间，单位秒，如果设置为 0，SDK 不会做超时检测，也不会触发超时回调。
+ * @param onAccepted 邀请被接受的回调。
+ * @param onRejected 邀请被拒绝的回调。
+ * @param onCancelled 邀请被取消的回调。
+ * @param onTimeout 邀请超时未处理的回调。
+ * @param onError 邀请发生错误的回调。
+ * @return TUIRequest 请求体。
+ */
+- (TUIRequest *)takeUserOnSeatByAdmin:(NSInteger)seatIndex
+                               userId:(NSString *)userId
+                              timeout:(NSTimeInterval)timeout
+                           onAccepted:(TUIRequestAcceptedBlock)onAccepted
+                           onRejected:(TUIRequestRejectedBlock)onRejected
+                          onCancelled:(TUIRequestCancelledBlock)onCancelled
+                            onTimeout:(TUIRequestTimeoutBlock)onTimeout
+                              onError:(TUIRequestErrorBlock)onError NS_SWIFT_NAME(takeUserOnSeatByAdmin(_:userId:timeout:onAccepted:onRejected:onCancelled:onTimeout:onError:));
+
 NS_ASSUME_NONNULL_END
 @end
