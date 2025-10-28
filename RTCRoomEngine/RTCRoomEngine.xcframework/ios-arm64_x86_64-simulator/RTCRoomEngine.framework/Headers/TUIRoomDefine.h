@@ -131,26 +131,6 @@ typedef NS_ENUM(NSUInteger, TUIMoveSeatPolicy) {
 
 };
 
-/**
- * 1.9 锁定麦位标记位
- */
-typedef NS_OPTIONS(NSUInteger, TUISeatLockFlag) {
-
-    TUISeatLockFlagNone = 0x00,
-
-    /// 锁定麦位
-    TUISeatLockFlagSeat = 0x01 << 0,
-
-    /// 锁定麦位摄像头
-    TUISeatLockFlagVideo = 0x01 << 1,
-
-    /// 锁定麦位麦克风
-    TUISeatLockFlagAudio = 0x01 << 2,
-
-    TUISeatLockFlagAll = TUISeatLockFlagSeat | TUISeatLockFlagVideo | TUISeatLockFlagAudio,
-
-};
-
 /////////////////////////////////////////////////////////////////////////////////
 //
 //                    音视频相关枚举值定义
@@ -574,9 +554,6 @@ TUIENGINE_EXPORT @interface TUISeatLockParams : NSObject
 /// 锁定麦位麦克风，默认值：{@link NO}。
 @property(nonatomic, assign) BOOL lockAudio;
 
-/// 锁定麦位标记位，默认值：{@link TUISeatLockFlagAll}。
-@property(nonatomic, assign) TUISeatLockFlag lockFlag;
-
 @end
 
 /**
@@ -754,13 +731,6 @@ typedef void (^TUIRequestRejectedBlock)(NSString* _Nonnull requestId, NSString* 
 typedef void (^TUIRequestCancelledBlock)(NSString* _Nonnull requestId, NSString* _Nonnull userId);
 typedef void (^TUIRequestTimeoutBlock)(NSString* _Nonnull requestId, NSString* _Nonnull userId);
 typedef void (^TUIRequestErrorBlock)(NSString* _Nonnull requestId, NSString* _Nonnull userId, TUIError code, NSString* _Nonnull message);
-
-typedef void (^TUIRequestAcceptedCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
-typedef void (^TUIRequestRejectedCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo, NSString* _Nonnull message);
-typedef void (^TUIRequestCancelledCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
-typedef void (^TUIRequestTimeoutCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
-typedef void (^TUIRequestSuccessCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo);
-typedef void (^TUIRequestErrorCallback)(NSString* _Nonnull requestId, TUIUserInfo* _Nonnull userInfo, TUIError code, NSString* _Nonnull message);
 
 typedef void (^TUIExperimentalAPIResponseBlock)(NSString* _Nonnull jsonData);
 

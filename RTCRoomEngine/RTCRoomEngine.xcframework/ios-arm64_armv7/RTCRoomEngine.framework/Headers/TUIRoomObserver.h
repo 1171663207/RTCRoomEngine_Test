@@ -296,15 +296,11 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  * 当麦位列表改变时触发。
- * @param roomId 当前的房间 ID
  * @param seatList 目前麦上最新的用户列表，包含新上麦的用户。
- * @param newlySeatedUsers 新上麦的用户列表。
- * @param newlyLeftUsers 新下麦的用户列表。
+ * @param seatedList 新上麦的用户列表。
+ * @param leftList 新下麦的用户列表。
  */
-- (void)onSeatListChanged:(NSString *)roomId
-                 seatList:(NSArray<TUISeatFullInfo *> *)seatList
-         newlySeatedUsers:(NSArray<TUIUserInfo *> *)newlySeatedUsers
-           newlyLeftUsers:(NSArray<TUIUserInfo *> *)newlyLeftUsers NS_SWIFT_NAME(onSeatListChanged(roomId:seatList:newlySeatedUsers:newlyLeftUsers:));
+- (void)onSeatListChanged:(NSArray<TUISeatInfo *> *)seatList seated:(NSArray<TUISeatInfo *> *)seatedList left:(NSArray<TUISeatInfo *> *)leftList NS_SWIFT_NAME(onSeatListChanged(seatList:seated:left:));
 
 /**
  * 5.2 收到用户被踢下麦事件
@@ -392,20 +388,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)onDeviceChanged:(NSString *)deviceId type:(TUIMediaDeviceType)type state:(TUIMediaDeviceState)state NS_SWIFT_NAME(onDeviceChanged(deviceId:type:state:)) __attribute__((deprecated("use onDeviceChanged in TUIRoomDeviceManager instead")));
 
 #endif
-
-/**
- * 麦位列表发生变化事件
- *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
- * 当麦位列表改变时触发。
- * @deprecated 此回调在 v3.5 版本开始废弃，未来会被回收，请使用 onSeatListChanged(roomId, seatList, newlySeatedUsers, newlyLeftUsers) 代替。
- * @param seatList 目前麦上最新的用户列表，包含新上麦的用户。
- * @param seatedList 新上麦的用户列表。
- * @param leftList 新下麦的用户列表。
- */
-- (void)onSeatListChanged:(NSArray<TUISeatInfo *> *)seatList
-                   seated:(NSArray<TUISeatInfo *> *)seatedList
-                     left:(NSArray<TUISeatInfo *> *)leftList NS_SWIFT_NAME(onSeatListChanged(seatList:seated:left:)) __attribute__((deprecated("use onSeatListChanged(roomId:seatList:newlySeatedUsers:newlyLeftUsers:) instead")));
 
 @end
 NS_ASSUME_NONNULL_END

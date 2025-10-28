@@ -1167,13 +1167,6 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  */
 - (void)searchUsers:(TUIUserSearchParam *)param onSuccess:(TUIUserSearchResponseBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(searchUsers(param:onSuccess:onError:));
 
-/**
- * 6.4  获取被禁言的用户列表
- *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
- */
-- (void)getBannedUserList:(TUIUserListResponseBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(getBannedUserList(onSuccess:onError:));
-
 /////////////////////////////////////////////////////////////////////////////////
 //
 //                   房间内用户管理
@@ -1363,24 +1356,22 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  * 上麦成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onSeatListChanged} 通知房间内用户。
  * @note 开启上麦发言模式时，需要向主持人或管理员发起申请才允许上麦。
  *       开启自由发言模式，直播场景可以自由上麦，上麦后开麦发言，会议场景无需调用该接口，即可开麦发言。
- * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
+ * @param seatIndex 麦位编号。未开启麦位，不关心麦位序列的情况下，填-1即可。
  * @param timeout 超时时间，单位秒，如果设置为 0，SDK 不会做超时检测，也不会触发超时回调。
  * @param onAccepted 邀请被接受的回调。
  * @param onRejected 邀请被拒绝的回调。
  * @param onCancelled 邀请被取消的回调。
  * @param onTimeout 邀请超时未处理的回调。
- * @param onSuccess 邀请发送成功的回调。
  * @param onError 邀请发生错误的回调。
  * @return TUIRequest 请求体。
  */
 - (TUIRequest *)takeSeat:(NSInteger)seatIndex
                  timeout:(NSTimeInterval)timeout
-              onAccepted:(TUIRequestAcceptedCallback)onAccepted
-              onRejected:(TUIRequestRejectedCallback)onRejected
-             onCancelled:(TUIRequestCancelledCallback)onCancelled
-               onTimeout:(TUIRequestTimeoutCallback)onTimeout
-               onSuccess:(TUIRequestSuccessCallback)onSuccess
-                 onError:(TUIRequestErrorCallback)onError NS_SWIFT_NAME(takeSeat(seatIndex:timeout:onAccepted:onRejected:onCancelled:onTimeout:onSuccess:onError:));
+              onAccepted:(TUIRequestAcceptedBlock)onAccepted
+              onRejected:(TUIRequestRejectedBlock)onRejected
+             onCancelled:(TUIRequestCancelledBlock)onCancelled
+               onTimeout:(TUIRequestTimeoutBlock)onTimeout
+                 onError:(TUIRequestErrorBlock)onError NS_SWIFT_NAME(takeSeat(_:timeout:onAccepted:onRejected:onCancelled:onTimeout:onError:));
 
 /**
  * 9.4  下麦
@@ -1403,33 +1394,31 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  *
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  * 接口调用成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onRequestReceived} 通知被邀请用户。
- * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
+ * @param seatIndex 麦位编号。未开启麦位、无需麦位场景下无需关心，填-1即可。
  * @param userId 用户ID。
  * @param timeout 超时时间，单位秒，如果设置为 0，SDK 不会做超时检测，也不会触发超时回调。
  * @param onAccepted 邀请被接受的回调。
  * @param onRejected 邀请被拒绝的回调。
  * @param onCancelled 邀请被取消的回调。
  * @param onTimeout 邀请超时未处理的回调。
- * @param onSuccess 邀请发送成功的回调。
  * @param onError 邀请发生错误的回调。
  * @return TUIRequest 请求体。
  */
 - (TUIRequest *)takeUserOnSeatByAdmin:(NSInteger)seatIndex
                                userId:(NSString *)userId
                               timeout:(NSTimeInterval)timeout
-                           onAccepted:(TUIRequestAcceptedCallback)onAccepted
-                           onRejected:(TUIRequestRejectedCallback)onRejected
-                          onCancelled:(TUIRequestCancelledCallback)onCancelled
-                            onTimeout:(TUIRequestTimeoutCallback)onTimeout
-                            onSuccess:(TUIRequestSuccessCallback)onSuccess
-                              onError:(TUIRequestErrorCallback)onError NS_SWIFT_NAME(takeUserOnSeatByAdmin(seatIndex:userId:timeout:onAccepted:onRejected:onCancelled:onTimeout:onSuccess:onError:));
+                           onAccepted:(TUIRequestAcceptedBlock)onAccepted
+                           onRejected:(TUIRequestRejectedBlock)onRejected
+                          onCancelled:(TUIRequestCancelledBlock)onCancelled
+                            onTimeout:(TUIRequestTimeoutBlock)onTimeout
+                              onError:(TUIRequestErrorBlock)onError NS_SWIFT_NAME(takeUserOnSeatByAdmin(_:userId:timeout:onAccepted:onRejected:onCancelled:onTimeout:onError:));
 
 /**
  * 9.7  主持人/管理员 将用户踢下麦
  *
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  * 接口调用成功后,SDK会通过 {@link TUIRoomObserver} 中的 {@link onSeatListChanged} 通知房间内用户。
- * @param seatIndex 麦位编号。未开启麦位、不关心麦位序列的情况下，填-1即可。
+ * @param seatIndex 麦位编号。未开启麦位，不关心麦位序列的情况下，填-1即可。
  * @param userId 用户ID。
  */
 - (void)kickUserOffSeatByAdmin:(NSInteger)seatIndex userId:(NSString *)userId onSuccess:(TUISuccessBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(kickUserOffSeatByAdmin(_:userId:onSuccess:onError:));
@@ -1457,13 +1446,6 @@ TUIENGINE_EXPORT @interface TUIRoomEngine : NSObject
  * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
  */
 - (void)getSeatApplicationList:(TUIRequestListResponseBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(getSeatApplicationList(onSuccess:onError:));
-
-/**
- * 9.10 查询麦位列表
- *
- * @note 此函数支持会议房间类型和直播房间类型({@link TUIRoomTypeConference} & {@link TUIRoomTypeLive})。
- */
-- (NSArray<TUISeatFullInfo *> *)querySeatList NS_SWIFT_NAME(querySeatList());
 
 /////////////////////////////////////////////////////////////////////////////////
 //
