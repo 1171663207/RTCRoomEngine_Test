@@ -83,10 +83,13 @@ TUIENGINE_EXPORT @interface TUIConferenceInfo : NSObject
 
 @end
 
+typedef void (^TUIConferenceInfoBlock)(TUIConferenceInfo *_Nonnull conference);
 typedef void (^TUIScheduledAttendeesResponseBlock)(NSArray<TUIUserInfo *> *_Nonnull list, NSString *cursor, NSUInteger totalAttendeeCount);
 typedef void (^TUIScheduledConferenceListResponseBlock)(NSArray<TUIConferenceInfo *> *_Nonnull list, NSString *cursor);
 
 @protocol TUIConferenceListManagerObserver <NSObject>
+
+@optional
 
 /**
  * 会议预定回调
@@ -105,11 +108,11 @@ typedef void (^TUIScheduledConferenceListResponseBlock)(NSArray<TUIConferenceInf
 /**
  * 会议取消回调
  *
- * @param roomId 会议Id，即房间roomId。
+ * @param conferenceInfo 会议信息。
  * @param reason 会议取消原因。
  * @param operateUser 取消会议操作者信息。
  */
-- (void)onConferenceCancelled:(NSString *)roomId reason:(TUIConferenceCancelReason)reason operateUser:(TUIUserInfo *)operateUser NS_SWIFT_NAME(onConferenceCancelled(roomId:reason:operateUser:));
+- (void)onConferenceDidCancelled:(TUIConferenceInfo *)conferenceInfo reason:(TUIConferenceCancelReason)reason operateUser:(TUIUserInfo *)operateUser NS_SWIFT_NAME(onConferenceDidCancelled(conferenceInfo:reason:operateUser:));
 
 /**
  * 会议信息变更回调
@@ -122,19 +125,49 @@ typedef void (^TUIScheduledConferenceListResponseBlock)(NSArray<TUIConferenceInf
 /**
  * 参会人员变更回调
  *
- * @param roomId 会议Id，即房间roomId。
+ * @param conferenceInfo 会议信息。
  * @param leftUsers 离开成员列表。
  * @param joinedUsers 新加入成员列表。
  */
-- (void)onScheduleAttendeesChanged:(NSString *)roomId leftUsers:(NSArray<TUIUserInfo *> *)leftUsers joinedUsers:(NSArray<TUIUserInfo *> *)joinedUsers NS_SWIFT_NAME(onScheduleAttendeesChanged(roomId:leftUsers:joinedUsers:));
+- (void)onScheduleAttendeesUpdated:(TUIConferenceInfo *)conferenceInfo leftUsers:(NSArray<TUIUserInfo *> *)leftUsers joinedUsers:(NSArray<TUIUserInfo *> *)joinedUsers NS_SWIFT_NAME(onScheduleAttendeesUpdated(conferenceInfo:leftUsers:joinedUsers:));
 
 /**
  * 会议状态变更回调
  *
+ * @param conferenceInfo 会议信息。
+ * @param status 会议状态枚举，详情参见：{@link TUIConferenceStatus}。
+ */
+- (void)onConferenceStatusUpdated:(TUIConferenceInfo *)conferenceInfo status:(TUIConferenceStatus)status NS_SWIFT_NAME(onConferenceStatusUpdated(conferenceInfo:status:));
+
+/**
+ * 会议取消回调 (从 3.6 版本开始废弃，请使用 onConferenceDidCancelled)
+ *
+ * @param roomId 会议Id，即房间roomId。
+ * @param reason 会议取消原因。
+ * @param operateUser 取消会议操作者信息。
+ */
+- (void)onConferenceCancelled:(NSString *)roomId
+                       reason:(TUIConferenceCancelReason)reason
+                  operateUser:(TUIUserInfo *)operateUser NS_SWIFT_NAME(onConferenceCancelled(roomId:reason:operateUser:)) __attribute__((deprecated("use onConferenceDidCancelled instead")));
+
+/**
+ * 参会人员变更回调 (从 3.6 版本开始废弃，请使用 onScheduleAttendeesUpdated)
+ *
+ * @param roomId 会议Id，即房间roomId。
+ * @param leftUsers 离开成员列表。
+ * @param joinedUsers 新加入成员列表。
+ */
+- (void)onScheduleAttendeesChanged:(NSString *)roomId
+                         leftUsers:(NSArray<TUIUserInfo *> *)leftUsers
+                       joinedUsers:(NSArray<TUIUserInfo *> *)joinedUsers NS_SWIFT_NAME(onScheduleAttendeesChanged(roomId:leftUsers:joinedUsers:)) __attribute__((deprecated("use onScheduleAttendeesUpdated instead")));
+
+/**
+ * 会议状态变更回调 (从 3.6 版本开始废弃，请使用 onConferenceStatusUpdated)
+ *
  * @param roomId 会议Id，即房间roomId。
  * @param status 会议状态枚举，详情参见：{@link TUIConferenceStatus}。
  */
-- (void)onConferenceStatusChanged:(NSString *)roomId status:(TUIConferenceStatus)status NS_SWIFT_NAME(onConferenceStatusChanged(roomId:status:));
+- (void)onConferenceStatusChanged:(NSString *)roomId status:(TUIConferenceStatus)status NS_SWIFT_NAME(onConferenceStatusChanged(roomId:status:)) __attribute__((deprecated("use onConferenceStatusUpdated instead")));
 
 @end
 
@@ -167,6 +200,13 @@ TUIENGINE_EXPORT @interface TUIConferenceListManager : NSObject
  * @param roomId 要取消会议的会议Id，即房间roomId。
  */
 - (void)cancelConference:(NSString *)roomId onSuccess:(TUISuccessBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(cancelConference(_:onSuccess:onError:));
+
+/**
+ * 查询会议房间详细信息
+ *
+ * @param roomId 会议房间 ID
+ */
+- (void)fetchConferenceInfo:(NSString *)roomId onSuccess:(TUIConferenceInfoBlock)onSuccess onError:(TUIErrorBlock)onError NS_SWIFT_NAME(fetchConferenceInfo(roomId:onSuccess:onError:));
 
 /**
  * 更新预定会议信息
